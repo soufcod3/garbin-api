@@ -4,12 +4,7 @@ import datasource from "./utils";
 import { buildSchema } from "type-graphql";
 import { customAuthChecker } from "./auth";
 import { UsersResolver } from "./resolvers/Users";
-// import { PostsResolver } from "./resolvers/Posts";
-// import { BlogsResolver} from "./resolvers/Blogs";
-// import { CommentsResolver } from "./resolvers/Comments";
-// import { PicturesResolver } from "./resolvers/Pictures";
-// import { StripeResolver } from "./resolvers/Stripe";
-// import { TransactionsResolver } from "./resolvers/Transactions";
+import { GarmentsResolver } from "./resolvers/Garments";
 
 const PORT = 5000;
 
@@ -18,12 +13,7 @@ async function bootstrap(): Promise<void> {
   const schema = await buildSchema({
     resolvers: [
       UsersResolver, 
-    //   PostsResolver, 
-    //   BlogsResolver, 
-    //   CommentsResolver, 
-    //   PicturesResolver, 
-    //   StripeResolver,
-    //   TransactionsResolver
+      GarmentsResolver
     ],
     authChecker: customAuthChecker
   });
