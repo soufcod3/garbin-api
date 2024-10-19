@@ -34,9 +34,9 @@ export class Garment {
     @Field()
     created_at: Date;
 
-    // updated at
-    @Column({ default: null })
-    @Field()
+    // updated at nullable
+    @Column({ nullable: true })
+    @Field({ nullable: true })
     updated_at: Date;
 
     //   @Column()
