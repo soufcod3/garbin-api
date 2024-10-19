@@ -12,6 +12,10 @@ export class Garment {
 
     @Column()
     @Field()
+    userId: number;
+
+    @Column()
+    @Field()
     name: string;
 
     @Column()

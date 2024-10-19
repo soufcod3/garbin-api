@@ -1,6 +1,7 @@
 import { Garment, GarmentInput } from '../entities/Garment';
-import { Arg, Authorized, Mutation, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import datasource from "../utils";
+import { IContext } from './Users';
 
 @Resolver()
 export class GarmentsResolver {
@@ -8,9 +9,10 @@ export class GarmentsResolver {
     @Authorized()
     @Mutation(() => Garment)
     async createGarment(
-        @Arg("data", () => GarmentInput) data: GarmentInput
+        @Arg("data", () => GarmentInput) data: GarmentInput,
+        @Ctx() context: IContext
     ) : Promise<Garment> {
-            return await datasource.getRepository(Garment).save(data);
+        return await datasource.getRepository(Garment).save({...data, userId: context.user.id});
     }
 
     @Authorized()
@@ -23,12 +25,16 @@ export class GarmentsResolver {
         return await datasource.getRepository(Garment).save({ ...garment, ...data, updated_at: new Date() });
     }
 
-    // delete garment
+    // type promise of boolean or object with error
     @Authorized()
     @Mutation(() => Boolean)
     async deleteGarment(
         @Arg("id") id: number
     ) : Promise<boolean> {
+        const garment = await datasource.getRepository(Garment).findOne({ where: { id } });
+        if (!garment) {
+            return false;
+        }
         await datasource.getRepository(Garment).delete({ id });
         return true;
     }
