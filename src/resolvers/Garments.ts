@@ -4,6 +4,8 @@ import datasource from "../utils";
 
 @Resolver()
 export class GarmentsResolver {
+    
+    @Authorized()
     @Mutation(() => Garment)
     async createGarment(
         @Arg("data", () => GarmentInput) data: GarmentInput
@@ -11,7 +13,6 @@ export class GarmentsResolver {
             return await datasource.getRepository(Garment).save(data);
     }
 
-    // updateGarment mutation based on GarmentInput
     @Authorized()
     @Mutation(() => Garment)
     async updateGarment(
