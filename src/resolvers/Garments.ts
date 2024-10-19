@@ -4,7 +4,7 @@ import datasource from "../utils";
 
 @Resolver()
 export class GarmentsResolver {
-    
+
     @Authorized()
     @Mutation(() => Garment)
     async createGarment(
@@ -21,6 +21,16 @@ export class GarmentsResolver {
     ) : Promise<Garment> {
         const garment = await datasource.getRepository(Garment).findOne({ where: { id } });
         return await datasource.getRepository(Garment).save({ ...garment, ...data, updated_at: new Date() });
+    }
+
+    // delete garment
+    @Authorized()
+    @Mutation(() => Boolean)
+    async deleteGarment(
+        @Arg("id") id: number
+    ) : Promise<boolean> {
+        await datasource.getRepository(Garment).delete({ id });
+        return true;
     }
 
 }
