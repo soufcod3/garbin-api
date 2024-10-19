@@ -5,6 +5,7 @@ import { buildSchema } from "type-graphql";
 import { customAuthChecker } from "./auth";
 import { UsersResolver } from "./resolvers/Users";
 import { GarmentsResolver } from "./resolvers/Garments";
+import { OutfitsResolver } from "./resolvers/Outfits";
 
 const PORT = 5000;
 
@@ -13,7 +14,8 @@ async function bootstrap(): Promise<void> {
   const schema = await buildSchema({
     resolvers: [
       UsersResolver, 
-      GarmentsResolver
+      GarmentsResolver,
+      OutfitsResolver
     ],
     authChecker: customAuthChecker
   });
@@ -54,5 +56,4 @@ async function bootstrap(): Promise<void> {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-floating-promises
 bootstrap();
