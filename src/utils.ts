@@ -3,6 +3,7 @@ import { DataSource } from "typeorm";
 import { User } from "./entities/User";
 import { Garment } from "./entities/Garment";
 import { Outfit } from "./entities/Outfit";
+import { OutfitPlan } from "./entities/OutfitPlan";
 
 console.log('POSTGRES HOST', process.env.POSTGRES_HOST)
 
@@ -14,7 +15,7 @@ const datasource = new DataSource({
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
   synchronize: true,
-  entities: [User, Garment, Outfit],
+  entities: [User, Garment, Outfit, OutfitPlan],
   logging: ["query", "error"],
 });
 

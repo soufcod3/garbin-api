@@ -6,6 +6,7 @@ import { customAuthChecker } from "./auth";
 import { UsersResolver } from "./resolvers/Users";
 import { GarmentsResolver } from "./resolvers/Garments";
 import { OutfitsResolver } from "./resolvers/Outfits";
+import { OutfitsPlansResolver } from "./resolvers/OutfitsPlans";
 
 const PORT = 5000;
 
@@ -15,7 +16,8 @@ async function bootstrap(): Promise<void> {
     resolvers: [
       UsersResolver, 
       GarmentsResolver,
-      OutfitsResolver
+      OutfitsResolver,
+      OutfitsPlansResolver
     ],
     authChecker: customAuthChecker
   });
