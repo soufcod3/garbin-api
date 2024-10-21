@@ -37,7 +37,7 @@ export class Outfit {
 
     @Column("int", { array: true, nullable: true })
     @Field(() => [Number], { nullable: true })
-    outfitPlans: number[];
+    outfitPlansIds: number[];
 
     @Column({ default: today })
     @Field()
@@ -64,7 +64,4 @@ export class OutfitInput {
 
     @Field({ nullable: true })
     shoeId: number;
-
-    @Field(() => [Number], { nullable: true })
-    outfitPlans: number[];
 }

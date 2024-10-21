@@ -2,6 +2,7 @@ import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import { OutfitPlan, OutfitPlanInput } from "../entities/OutfitPlan";
 import { IContext } from "./Users";
 import datasource from "../utils";
+import { Outfit } from "../entities/Outfit";
 
 @Resolver()
 export class OutfitsPlansResolver {
@@ -12,7 +13,22 @@ export class OutfitsPlansResolver {
         @Arg("data", () => OutfitPlanInput) data: OutfitPlanInput,
         @Ctx() context: IContext
     ) : Promise<OutfitPlan> {
-        return await datasource.getRepository(OutfitPlan).save({...data, userId: context.user.id});    
+        const outfit = await datasource.getRepository(Outfit).findOne({ where: { id: data.outfitId } });
+
+        if (outfit) {
+            try {
+                const outfitPlan = await datasource.getRepository(OutfitPlan).save({...data, userId: context.user.id});
+
+                const outfitPlansIds = outfit.outfitPlansIds || [];
+                outfitPlansIds.push(outfitPlan.id);
+
+                await datasource.getRepository(Outfit).save({ ...outfit, outfitPlansIds });
+    
+                return outfitPlan
+            } catch (err) {
+                return err
+            }
+        }
     }
 
     @Authorized()
