@@ -2,7 +2,9 @@ import { Garment, GarmentInput } from '../entities/Garment';
 import { Arg, Authorized, Ctx, Mutation, Query, Resolver } from "type-graphql";
 import datasource from "../utils";
 import { IContext } from './Users';
-
+import { removeTransparentAreas } from '../services/jimp';
+import { removeBackground } from '../services/removeBg';
+import { uploadToCloudinary } from '../services/cloudinary';
 @Resolver()
 export class GarmentsResolver {
 
@@ -12,7 +14,33 @@ export class GarmentsResolver {
         @Arg("data", () => GarmentInput) data: GarmentInput,
         @Ctx() context: IContext
     ) : Promise<Garment> {
-        return await datasource.getRepository(Garment).save({...data, userId: context.user.id});
+
+        try {
+            // Step 0: Remove transparent areas from the image
+            const croppedBuffer = await removeTransparentAreas(data.imageBase64);
+
+            // Step 1: Remove background
+            const noBgBuffer = await removeBackground(croppedBuffer);
+      
+            // Step 2: Upload the background-free image to Cloudinary
+            const imageUrl = await uploadToCloudinary(noBgBuffer);
+      
+            // Step 3: Create the garment with the Cloudinary image URL
+            const garment = datasource.getRepository(Garment).create({
+              ...data,
+              userId: context.user.id,
+              imageUrl // Store the Cloudinary URL
+            });
+      
+            await datasource.getRepository(Garment).save(garment);
+            return garment;
+            
+          } catch (error) {
+            console.error("Error uploading image or creating garment:", error);
+            throw new Error("Failed to create garment with image.");
+          }
+
+        
     }
 
     @Authorized()

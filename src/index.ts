@@ -7,6 +7,7 @@ import { UsersResolver } from "./resolvers/Users";
 import { GarmentsResolver } from "./resolvers/Garments";
 import { OutfitsResolver } from "./resolvers/Outfits";
 import { OutfitsPlansResolver } from "./resolvers/OutfitsPlans";
+import { v2 as cloudinary } from 'cloudinary';
 
 const PORT = 5000;
 
@@ -43,6 +44,13 @@ async function bootstrap(): Promise<void> {
       // add the user to the context    
       // return { user };   
     },
+  });
+
+  // Configure Cloudinary
+  cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
   });
 
   // Start the server

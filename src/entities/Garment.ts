@@ -35,6 +35,10 @@ export class Garment {
     @Field()
     category: string;
 
+    @Column({ nullable: true })
+    @Field({ nullable: true })
+    imageUrl: string;
+
     @Column("int", { array: true, nullable: true, default: [] })
     @Field(() => [Number], { nullable: true })
     outfitIds: number[] = [];
@@ -47,7 +51,6 @@ export class Garment {
     @Column({ nullable: true })
     @Field({ nullable: true })
     updated_at: Date;
-
 
 }
 
@@ -68,4 +71,7 @@ export class GarmentInput {
 
     @Field({ nullable: true })
     category: string;
+
+    @Field({ nullable: true })
+    imageBase64: string;
 }
