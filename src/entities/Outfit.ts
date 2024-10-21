@@ -1,5 +1,6 @@
 import { Field, ID, InputType, ObjectType } from "type-graphql";
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Garment } from "./Garment";
 
 const today = new Date();
 
@@ -18,21 +19,21 @@ export class Outfit {
     @Field()
     name: string;
 
-    @Column()
-    @Field()
-    mainTopId: number;
+    @ManyToOne(() => Garment, (garment) => garment.id, { nullable: true })
+    @Field(() => Garment, { nullable: true })
+    mainTop: Garment;
 
-    @Column()
-    @Field()
-    subTopId: number;
+    @ManyToOne(() => Garment, (garment) => garment.id, { nullable: true })
+    @Field(() => Garment, { nullable: true })
+    subTop: Garment;
 
-    @Column()
-    @Field()
-    bottomId: number;
+    @ManyToOne(() => Garment, (garment) => garment.id, { nullable: true })
+    @Field(() => Garment, { nullable: true })
+    bottom: Garment;
 
-    @Column()
-    @Field()
-    shoeId: number;
+    @ManyToOne(() => Garment, (garment) => garment.id, { nullable: true })
+    @Field(() => Garment, { nullable: true })
+    shoe: Garment;
 
     @Column("int", { array: true, nullable: true })
     @Field(() => [Number], { nullable: true })

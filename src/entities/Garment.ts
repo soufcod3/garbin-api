@@ -1,5 +1,6 @@
 import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
 import { ObjectType, Field, ID, InputType } from "type-graphql";
+import { Outfit } from "./Outfit";
 
 const today = new Date();
 
@@ -34,6 +35,10 @@ export class Garment {
     @Field()
     category: string;
 
+    @Column("int", { array: true, nullable: true, default: [] })
+    @Field(() => [Number], { nullable: true })
+    outfitIds: number[] = [];
+
     @Column({ default: today })
     @Field()
     created_at: Date;
@@ -43,9 +48,6 @@ export class Garment {
     @Field({ nullable: true })
     updated_at: Date;
 
-    //   @Column()
-    //   @OneToMany(() => Outfit, outfit => outfit.id)
-    //   outfits: Outfit[];
 
 }
 

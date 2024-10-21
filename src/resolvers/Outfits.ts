@@ -13,7 +13,91 @@ export class OutfitsResolver {
         @Arg("data", () => OutfitInput) data: OutfitInput,
         @Ctx() context: IContext
     ) : Promise<Outfit> {
-            return await datasource.getRepository(Outfit).save({ ...data, userId: context.user.id });
+        let mainTop = null;
+        let subTop = null;
+        let bottom = null;
+        let shoe = null;
+
+        if (data.mainTopId) {
+            const foundMainTop = await datasource.getRepository(Garment).findOne({ where: { id: data.mainTopId, category: "Haut principal" } });
+            if (foundMainTop) {
+                mainTop = foundMainTop;
+            } else {
+                throw new Error("Main top not found");
+            }
+        }
+
+        if (data.subTopId) {
+            const foundSubTop = await datasource.getRepository(Garment).findOne({ where: { id: data.subTopId, category: "Haut secondaire" } });
+            if (foundSubTop) {
+                subTop = foundSubTop;
+            } else {
+                throw new Error("Sub top not found");
+            }
+        }
+
+        if (data.bottomId) {
+            const foundBottom = await datasource.getRepository(Garment).findOne({ where: { id: data.bottomId, category: "Bas" } });
+            if (foundBottom) {
+                bottom = foundBottom;
+            } else {
+                throw new Error("Bottom not found");
+            }
+        }
+
+        if (data.shoeId) {
+            const foundShoe = await datasource.getRepository(Garment).findOne({ where: { id: data.shoeId, category: "Chaussures" } });
+            if (foundShoe) {
+                shoe = foundShoe;
+            } else {
+                throw new Error("Shoe not found");
+            }
+        }
+
+         // Create and save the new outfit
+        const newOutfit = await datasource.getRepository(Outfit).save({
+            ...data, 
+            userId: context.user.id, 
+            mainTop, 
+            subTop, 
+            bottom, 
+            shoe 
+        });
+
+        // Update garments with the newly created outfit in their outfits array
+        if (mainTop) {
+            console.log('MAINTOP', mainTop)
+            if (!mainTop.outfitIds.includes(newOutfit.id)) {
+                mainTop.outfitIds.push(newOutfit.id);
+            }
+            await datasource.getRepository(Garment).save(mainTop);
+        }
+
+        if (subTop) {
+            console.log('SUBTOP', subTop)
+            if (!subTop.outfitIds.includes(newOutfit.id)) {
+                subTop.outfitIds.push(newOutfit.id);
+            }
+            await datasource.getRepository(Garment).save(subTop);
+        }
+
+        if (bottom) {
+            console.log('BOTTOM', bottom)
+            if (!bottom.outfitIds.includes(newOutfit.id)) {
+                bottom.outfitIds.push(newOutfit.id);
+            }
+            await datasource.getRepository(Garment).save(bottom);
+        }
+
+        if (shoe) {
+            console.log('SHOE', shoe)
+            if (!shoe.outfitIds.includes(newOutfit.id)) {
+                shoe.outfitIds.push(newOutfit.id);
+            }
+            await datasource.getRepository(Garment).save(shoe);
+        }
+
+        return newOutfit;
     }
 
     @Authorized()
@@ -22,58 +106,42 @@ export class OutfitsResolver {
         @Arg("id") id: number,
         @Arg("data", () => OutfitInput) data: OutfitInput
     ) : Promise<Outfit> {
-        const outfit = await datasource.getRepository(Outfit).findOne({ where: { id } });
+        let foundMainTop = null;
+        let newSubTop = null;
+        let newBottom = null;
+        let newShoe = null;
 
-        // check the existence of mainTopId, subTopId, bottomId, and shoeId in garment table
+        // ⚠️ remove old outfitId from each garment
+
+        const outfit = await datasource.getRepository(Outfit).findOne({ where: { id }, relations: ["mainTop", "subTop", "bottom", "shoe"] });
+
         if (data.mainTopId) {
-            const mainTop = await datasource.getRepository(Garment).findOne({ where: { id: data.mainTopId } });
+            foundMainTop = await datasource.getRepository(Garment).findOne({ where: { id: data.mainTopId, category: "Haut principal" } });
+            if (foundMainTop) {
+                if (foundMainTop.id !== outfit.mainTop?.id) {
+                    // replace the mainTop in outfit with the new found mainTop
+                    outfit.mainTop = foundMainTop;
 
-            if (mainTop) {
-                if (mainTop.category !== "Haut principal") {
-                    throw new Error("Main top category must be Haut principal but is " + mainTop.category);
+                    if (!foundMainTop.outfitIds.includes(outfit.id)) {
+                        foundMainTop.outfitIds.push(outfit.id);
+                    }
+
+                    // save the garment
+                    await datasource.getRepository(Garment).save(foundMainTop);
                 }
             } else {
-                throw new Error("Main top not found");
-            }
-        }
-
-        if (data.subTopId) {
-            const subTop = await datasource.getRepository(Garment).findOne({ where: { id: data.subTopId } });
-
-            if (subTop) {
-                if (subTop.category !== "Haut secondaire") {
-                    throw new Error("Sub top category must be Haut secondaire but is " + subTop.category);
-                }
-            } else {
-                throw new Error("Sub top not found");
-            }
-        }
-
-        if (data.bottomId) {
-            const bottom = await datasource.getRepository(Garment).findOne({ where: { id: data.bottomId } });
-
-            if (bottom) {
-                if (bottom.category !== "Bas") {
-                    throw new Error("Bottom category must be Bas but is " + bottom.category);
-                }
-            } else {
-                throw new Error("Bottom not found");
-            }
-        }
-
-        if (data.shoeId) {
-            const shoe = await datasource.getRepository(Garment).findOne({ where: { id: data.shoeId } });
-
-            if (shoe) {
-                if (shoe.category !== "Chaussure") {
-                    throw new Error("Shoe category must be Chaussures but is " + shoe.category);
-                }
-            } else {
-                throw new Error("Shoe not found");
+                throw new Error(`Main top not found. Maybe ${data.name} has not the category Haut principal`);
             }
         }
         
-        return await datasource.getRepository(Outfit).save({ ...outfit, ...data, updated_at: new Date() });
+        const garmentsToUpdate = {
+            mainTop: foundMainTop || outfit.mainTop,
+            subTop: newSubTop || outfit.subTop,
+            bottom: newBottom || outfit.bottom,
+            shoe: newShoe || outfit.shoe
+        }
+        
+        return await datasource.getRepository(Outfit).save({ ...outfit, ...data, ...garmentsToUpdate,  updated_at: new Date() });
     }
 
     @Authorized()
@@ -94,7 +162,7 @@ export class OutfitsResolver {
     async outfits(
         @Ctx() context: IContext
     ) : Promise<Outfit[]> {
-        return await datasource.getRepository(Outfit).find({ where: { userId: context.user.id } });
+        return await datasource.getRepository(Outfit).find({ where: { userId: context.user.id }, relations: ["mainTop", "subTop", "bottom", "shoe"] });
     }
 
     @Authorized()
@@ -103,7 +171,7 @@ export class OutfitsResolver {
         @Arg("id") id: number,
         @Ctx() context: IContext
     ) : Promise<Outfit> {
-        return await datasource.getRepository(Outfit).findOne({ where: { id, userId: context.user.id } });
+        return await datasource.getRepository(Outfit).findOne({ where: { id, userId: context.user.id }, relations: ["mainTop", "subTop", "bottom", "shoe"] });
     }
 
 }

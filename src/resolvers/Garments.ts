@@ -47,7 +47,7 @@ export class GarmentsResolver {
         if (category) {
             return await datasource.getRepository(Garment).find({ where: { category } });
         }
-        return await datasource.getRepository(Garment).find();
+        return await datasource.getRepository(Garment).find({ order: { id: "ASC" } });
     }
 
     @Authorized()
