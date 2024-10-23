@@ -6,6 +6,9 @@ import { Outfit } from "./entities/Outfit";
 import { OutfitPlan } from "./entities/OutfitPlan";
 
 console.log('POSTGRES HOST', process.env.POSTGRES_HOST)
+console.log('POSTGRES USER', process.env.POSTGRES_USER)
+console.log('POSTGRES PASSWORD', process.env.POSTGRES_PASSWORD)
+console.log('POSTGRES DB', process.env.POSTGRES_DB)
 
 const datasource = new DataSource({
   type: "postgres",
