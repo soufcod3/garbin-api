@@ -1,5 +1,6 @@
 services:
   garbin-souf-api:
+    image: garbin-souf-api
     build: ./
     ports:
       - 5005:5005
