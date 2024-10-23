@@ -9,7 +9,7 @@ import { OutfitsResolver } from "./resolvers/Outfits";
 import { OutfitsPlansResolver } from "./resolvers/OutfitsPlans";
 import { v2 as cloudinary } from 'cloudinary';
 
-const PORT = 5000;
+const PORT = 5005;
 
 async function bootstrap(): Promise<void> {
   // ... Building schema here
